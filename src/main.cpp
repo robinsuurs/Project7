@@ -1,59 +1,126 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include "FastIMU.h"
+#include "Madgwick.h"
 
-#include "I2C_MPU6886.h"
 
 
-I2C_MPU6886 imu(I2C_MPU6886_DEFAULT_ADDRESS, Wire);
+#define IMU_ADDRESS 0x68    //Change to the address of the IMU
+#define PERFORM_CALIBRATION //Comment to disable startup calibration
+MPU6886 IMU;               //Change to the name of any supported IMU!
+
+calData calib = { 0 };  //Calibration data
+AccelData accelData;    //Sensor data
+GyroData gyroData;
+MagData magData;
 
 void setup() {
-// write your initialization code here
+  Wire.begin();
+  Wire.setClock(400000); //400khz clock
+  Serial.begin(9600);
+  while (!Serial) {
+    ;
+  }
 
-    Serial.begin(115200);
+  int err = IMU.init(calib, IMU_ADDRESS);
+  if (err != 0) {
+    Serial.print("Error initializing IMU: ");
+    Serial.println(err);
+    while (true) {
+      ;
+    }
+  }
+
+#ifdef PERFORM_CALIBRATION
+  Serial.println("FastIMU calibration & data example");
+  if (IMU.hasMagnetometer()) {
     delay(1000);
+    Serial.println("Move IMU in figure 8 pattern until done.");
+    delay(3000);
+    IMU.calibrateMag(&calib);
+    Serial.println("Magnetic calibration done!");
+  }
+  else {
+    delay(5000);
+  }
 
-    Wire.begin();
-    imu.begin();
+  delay(5000);
+  Serial.println("Keep IMU level.");
+  delay(5000);
+  IMU.calibrateAccelGyro(&calib);
+  Serial.println("Calibration done!");
+  Serial.println("Accel biases X/Y/Z: ");
+  Serial.print(calib.accelBias[0]);
+  Serial.print(", ");
+  Serial.print(calib.accelBias[1]);
+  Serial.print(", ");
+  Serial.println(calib.accelBias[2]);
+  Serial.println("Gyro biases X/Y/Z: ");
+  Serial.print(calib.gyroBias[0]);
+  Serial.print(", ");
+  Serial.print(calib.gyroBias[1]);
+  Serial.print(", ");
+  Serial.println(calib.gyroBias[2]);
+  if (IMU.hasMagnetometer()) {
+    Serial.println("Mag biases X/Y/Z: ");
+    Serial.print(calib.magBias[0]);
+    Serial.print(", ");
+    Serial.print(calib.magBias[1]);
+    Serial.print(", ");
+    Serial.println(calib.magBias[2]);
+    Serial.println("Mag Scale X/Y/Z: ");
+    Serial.print(calib.magScale[0]);
+    Serial.print(", ");
+    Serial.print(calib.magScale[1]);
+    Serial.print(", ");
+    Serial.println(calib.magScale[2]);
+  }
+  delay(5000);
+  IMU.init(calib, IMU_ADDRESS);
+#endif
 
+  //err = IMU.setGyroRange(500);      //USE THESE TO SET THE RANGE, IF AN INVALID RANGE IS SET IT WILL RETURN -1
+  //err = IMU.setAccelRange(2);       //THESE TWO SET THE GYRO RANGE TO ±500 DPS AND THE ACCELEROMETER RANGE TO ±2g
 
+  if (err != 0) {
+    Serial.print("Error Setting range: ");
+    Serial.println(err);
+    while (true) {
+      ;
+    }
+  }
 }
 
 void loop() {
-// write your code here
-    float ax;
-    float ay;
-    float az;
-    float gx;
-    float gy;
-    float gz;
-    float t;
-
-    imu.getAccel(&ax, &ay, &az);
-    imu.getGyro(&gx, &gy, &gz);
-    imu.getTemp(&t);
-
-    Serial.print("ax: ");
-    Serial.print(ax);
-    Serial.print(" ");
-    Serial.print("ay: ");
-    Serial.print(ay);
-    Serial.print(" ");
-    Serial.print("az: ");
-    Serial.print(az);
-    Serial.println(" ");
-    Serial.print("gx: ");
-    Serial.print(gx);
-    Serial.print(" ");
-    Serial.print("gy: ");
-    Serial.print(gy);
-    Serial.print(" ");
-    Serial.print("gz: ");
-    Serial.print(gz);
-    Serial.print(" ");
-    Serial.print("t: ");
-    Serial.print(t);
-    Serial.println(" ");
-
-
-    delay(100);
+  IMU.update();
+  IMU.getAccel(&accelData);
+  Serial.print(accelData.accelX);
+  Serial.print("\t");
+  Serial.print(accelData.accelY);
+  Serial.print("\t");
+  Serial.print(accelData.accelZ);
+  Serial.print("\t");
+  IMU.getGyro(&gyroData);
+  Serial.print(gyroData.gyroX);
+  Serial.print("\t");
+  Serial.print(gyroData.gyroY);
+  Serial.print("\t");
+  Serial.print(gyroData.gyroZ);
+  if (IMU.hasMagnetometer()) {
+    IMU.getMag(&magData);
+    Serial.print("\t");
+    Serial.print(magData.magX);
+    Serial.print("\t");
+    Serial.print(magData.magY);
+    Serial.print("\t");
+    Serial.print(magData.magZ);
+  }
+  if (IMU.hasTemperature()) {
+	  Serial.print("\t");
+	  Serial.println(IMU.getTemp());
+  }
+  else {
+    Serial.println();
+  }
+  delay(50);
 }
