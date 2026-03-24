@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "FastIMU.h"
-#include "Madgwick.h"
 
 
 
@@ -33,16 +32,6 @@ void setup() {
 
 #ifdef PERFORM_CALIBRATION
   Serial.println("FastIMU calibration & data example");
-  if (IMU.hasMagnetometer()) {
-    delay(1000);
-    Serial.println("Move IMU in figure 8 pattern until done.");
-    delay(3000);
-    IMU.calibrateMag(&calib);
-    Serial.println("Magnetic calibration done!");
-  }
-  else {
-    delay(5000);
-  }
 
   delay(5000);
   Serial.println("Keep IMU level.");
@@ -61,26 +50,13 @@ void setup() {
   Serial.print(calib.gyroBias[1]);
   Serial.print(", ");
   Serial.println(calib.gyroBias[2]);
-  if (IMU.hasMagnetometer()) {
-    Serial.println("Mag biases X/Y/Z: ");
-    Serial.print(calib.magBias[0]);
-    Serial.print(", ");
-    Serial.print(calib.magBias[1]);
-    Serial.print(", ");
-    Serial.println(calib.magBias[2]);
-    Serial.println("Mag Scale X/Y/Z: ");
-    Serial.print(calib.magScale[0]);
-    Serial.print(", ");
-    Serial.print(calib.magScale[1]);
-    Serial.print(", ");
-    Serial.println(calib.magScale[2]);
-  }
+
   delay(5000);
   IMU.init(calib, IMU_ADDRESS);
 #endif
 
-  //err = IMU.setGyroRange(500);      //USE THESE TO SET THE RANGE, IF AN INVALID RANGE IS SET IT WILL RETURN -1
-  //err = IMU.setAccelRange(2);       //THESE TWO SET THE GYRO RANGE TO ±500 DPS AND THE ACCELEROMETER RANGE TO ±2g
+  err = IMU.setGyroRange(500);      //USE THESE TO SET THE RANGE, IF AN INVALID RANGE IS SET IT WILL RETURN -1
+  err = IMU.setAccelRange(2);       //THESE TWO SET THE GYRO RANGE TO ±500 DPS AND THE ACCELEROMETER RANGE TO ±2g
 
   if (err != 0) {
     Serial.print("Error Setting range: ");
@@ -92,35 +68,33 @@ void setup() {
 }
 
 void loop() {
-  IMU.update();
-  IMU.getAccel(&accelData);
+
+  IMU.update();                     //Read IMU data from I2C bus save in -> this->accel this->gyro
+
+  IMU.getAccel(&accelData);         //Write IMU.accel to accelData
+
+  ///Print accel data
   Serial.print(accelData.accelX);
   Serial.print("\t");
   Serial.print(accelData.accelY);
   Serial.print("\t");
   Serial.print(accelData.accelZ);
   Serial.print("\t");
-  IMU.getGyro(&gyroData);
+
+
+  IMU.getGyro(&gyroData);           //Write IMU.gyro to gyroData
+
+  ///Print gyro data
   Serial.print(gyroData.gyroX);
   Serial.print("\t");
   Serial.print(gyroData.gyroY);
   Serial.print("\t");
   Serial.print(gyroData.gyroZ);
-  if (IMU.hasMagnetometer()) {
-    IMU.getMag(&magData);
-    Serial.print("\t");
-    Serial.print(magData.magX);
-    Serial.print("\t");
-    Serial.print(magData.magY);
-    Serial.print("\t");
-    Serial.print(magData.magZ);
-  }
+
   if (IMU.hasTemperature()) {
 	  Serial.print("\t");
 	  Serial.println(IMU.getTemp());
   }
-  else {
-    Serial.println();
-  }
+
   delay(50);
 }
