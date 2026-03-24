@@ -4,14 +4,18 @@
 
 
 
-#define IMU_ADDRESS 0x68    //Change to the address of the IMU
+#define IMU1_ADDRESS 0x68    //Change to the address of the IMU
+#define IMU2_ADDRESS 0x69
 #define PERFORM_CALIBRATION //Comment to disable startup calibration
-MPU6886 IMU;               //Change to the name of any supported IMU!
+MPU6886 IMU1;               //Change to the name of any supported IMU!
+MPU6886 IMU2;
+calData calib1 = { 0 };  //Calibration data
+calData calib2 = { 0 };
+AccelData accelData1;    //Sensor data
+AccelData accelData2;
+GyroData gyroData1;
+GyroData gyroData2;
 
-calData calib = { 0 };  //Calibration data
-AccelData accelData;    //Sensor data
-GyroData gyroData;
-MagData magData;
 
 void setup() {
   Wire.begin();
@@ -21,7 +25,9 @@ void setup() {
     ;
   }
 
-  int err = IMU.init(calib, IMU_ADDRESS);
+  int err = IMU1.init(calib1, IMU1_ADDRESS);
+  err = IMU2.init(calib2, IMU2_ADDRESS);
+
   if (err != 0) {
     Serial.print("Error initializing IMU: ");
     Serial.println(err);
@@ -36,27 +42,46 @@ void setup() {
   delay(5000);
   Serial.println("Keep IMU level.");
   delay(5000);
-  IMU.calibrateAccelGyro(&calib);
+
+  IMU1.calibrateAccelGyro(&calib1);
+  IMU2.calibrateAccelGyro(&calib2);
+
   Serial.println("Calibration done!");
   Serial.println("Accel biases X/Y/Z: ");
-  Serial.print(calib.accelBias[0]);
+  Serial.print(calib1.accelBias[0]);
   Serial.print(", ");
-  Serial.print(calib.accelBias[1]);
+  Serial.print(calib1.accelBias[1]);
   Serial.print(", ");
-  Serial.println(calib.accelBias[2]);
+  Serial.println(calib1.accelBias[2]);
+
+  Serial.print(calib2.accelBias[0]);
+  Serial.print(", ");
+  Serial.print(calib2.accelBias[1]);
+  Serial.print(", ");
+  Serial.println(calib2.accelBias[2]);
+
   Serial.println("Gyro biases X/Y/Z: ");
-  Serial.print(calib.gyroBias[0]);
+  Serial.print(calib1.gyroBias[0]);
   Serial.print(", ");
-  Serial.print(calib.gyroBias[1]);
+  Serial.print(calib1.gyroBias[1]);
   Serial.print(", ");
-  Serial.println(calib.gyroBias[2]);
+  Serial.println(calib1.gyroBias[2]);
+
+  Serial.print(calib2.gyroBias[0]);
+  Serial.print(", ");
+  Serial.print(calib2.gyroBias[1]);
+  Serial.print(", ");
+  Serial.println(calib2.gyroBias[2]);
 
   delay(5000);
-  IMU.init(calib, IMU_ADDRESS);
+  IMU1.init(calib1, IMU1_ADDRESS);
+  IMU2.init(calib2, IMU2_ADDRESS);
 #endif
 
-  err = IMU.setGyroRange(500);      //USE THESE TO SET THE RANGE, IF AN INVALID RANGE IS SET IT WILL RETURN -1
-  err = IMU.setAccelRange(2);       //THESE TWO SET THE GYRO RANGE TO ±500 DPS AND THE ACCELEROMETER RANGE TO ±2g
+  err = IMU1.setGyroRange(500);      //USE THESE TO SET THE RANGE, IF AN INVALID RANGE IS SET IT WILL RETURN -1
+  err = IMU1.setAccelRange(2);       //THESE TWO SET THE GYRO RANGE TO ±500 DPS AND THE ACCELEROMETER RANGE TO ±2g
+  err = IMU2.setGyroRange(500);
+  err = IMU2.setAccelRange(2);
 
   if (err != 0) {
     Serial.print("Error Setting range: ");
@@ -69,32 +94,37 @@ void setup() {
 
 void loop() {
 
-  IMU.update();                     //Read IMU data from I2C bus save in -> this->accel this->gyro
+  IMU1.update();                     //Read IMU data from I2C bus save in -> this->accel this->gyro
+  IMU2.update();
 
-  IMU.getAccel(&accelData);         //Write IMU.accel to accelData
+  IMU1.getAccel(&accelData1);         //Write IMU.accel to accelData
+  IMU2.getAccel(&accelData2);
 
   ///Print accel data
-  Serial.print(accelData.accelX);
+  Serial.print(accelData1.accelX);
   Serial.print("\t");
-  Serial.print(accelData.accelY);
+  Serial.print(accelData1.accelY);
   Serial.print("\t");
-  Serial.print(accelData.accelZ);
+  Serial.print(accelData1.accelZ);
+  Serial.print("\t");
+
+  Serial.print(accelData2.accelX);
+  Serial.print("\t");
+  Serial.print(accelData2.accelY);
+  Serial.print("\t");
+  Serial.print(accelData2.accelZ);
   Serial.print("\t");
 
 
-  IMU.getGyro(&gyroData);           //Write IMU.gyro to gyroData
 
-  ///Print gyro data
-  Serial.print(gyroData.gyroX);
+  IMU1.getGyro(&gyroData1);           //Write IMU.gyro to gyroData
+  IMU2.getGyro(&gyroData2);
+
+  /*///Print gyro data
+  Serial.print(gyroData1.gyroX);
   Serial.print("\t");
-  Serial.print(gyroData.gyroY);
+  Serial.print(gyroData1.gyroY);
   Serial.print("\t");
-  Serial.print(gyroData.gyroZ);
+  Serial.print(gyroData1.gyroZ);*/
 
-  if (IMU.hasTemperature()) {
-	  Serial.print("\t");
-	  Serial.println(IMU.getTemp());
-  }
-
-  delay(50);
 }
