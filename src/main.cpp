@@ -101,6 +101,7 @@ void loop() {
   IMU2.getAccel(&accelData2);
 
   ///Print accel data
+  Serial.println("");
   Serial.print(accelData1.accelX);
   Serial.print("\t");
   Serial.print(accelData1.accelY);
@@ -108,6 +109,7 @@ void loop() {
   Serial.print(accelData1.accelZ);
   Serial.print("\t");
 
+//  Serial.println("Accel2: ");
   Serial.print(accelData2.accelX);
   Serial.print("\t");
   Serial.print(accelData2.accelY);
@@ -116,15 +118,22 @@ void loop() {
   Serial.print("\t");
 
 
-
+/*
   IMU1.getGyro(&gyroData1);           //Write IMU.gyro to gyroData
   IMU2.getGyro(&gyroData2);
 
-  /*///Print gyro data
+  ///Print gyro data
   Serial.print(gyroData1.gyroX);
   Serial.print("\t");
   Serial.print(gyroData1.gyroY);
   Serial.print("\t");
-  Serial.print(gyroData1.gyroZ);*/
+  Serial.print(gyroData1.gyroZ);
+  Serial.print("\t");
+  Serial.print(gyroData2.gyroX);
+  Serial.print("\t");
+  Serial.print(gyroData2.gyroY);
+  Serial.print("\t");
+  Serial.print(gyroData2.gyroZ);
+*/
 
 }
