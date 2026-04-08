@@ -96,7 +96,7 @@ void loop() {
 
   IMU1.update();                     //Read IMU data from I2C bus save in -> this->accel this->gyro
   IMU2.update();
-
+/*
   IMU1.getAccel(&accelData1);         //Write IMU.accel to accelData
   IMU2.getAccel(&accelData2);
 
@@ -116,9 +116,9 @@ void loop() {
   Serial.print("\t");
   Serial.print(accelData2.accelZ);
   Serial.print("\t");
+*/
 
 
-/*
   IMU1.getGyro(&gyroData1);           //Write IMU.gyro to gyroData
   IMU2.getGyro(&gyroData2);
 
@@ -134,6 +134,6 @@ void loop() {
   Serial.print(gyroData2.gyroY);
   Serial.print("\t");
   Serial.print(gyroData2.gyroZ);
-*/
+  Serial.println("\t");
 
 }
