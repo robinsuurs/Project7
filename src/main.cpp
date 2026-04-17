@@ -7,14 +7,16 @@
 #define ToggleBit(byte, bit)    (byte ^= BV(bit))
 
 
-#define PWM_PIN     PD6
+#define PWM_PIN     PD6         //D6
 #define PWM_PORT    PORTD
 #define PWM_DDR     DDRD
 
-#define AIN2        PB1
-#define AIN1        PB0
+#define AIN2        PB1        //D9
+#define AIN1        PB0        //D8
 #define AIN_DDR     DDRB
 #define AIN_PORT    PORTB
+
+//.5 - 10,5K rechts is naar boven
 
 #define Links   false
 #define Rechts  true
@@ -85,7 +87,7 @@ void setup() {
 
 void loop() {
 
-    SetMotor(5, Rechts);
+    SetMotor(75, Rechts);
 
 
 }
