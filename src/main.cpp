@@ -16,6 +16,8 @@
 #define AIN_DDR     DDRB
 #define AIN_PORT    PORTB
 
+#define ServoPos    A0
+
 //.5 - 10,5K rechts is naar boven
 
 #define Links   false
@@ -74,6 +76,25 @@ void SetMotor(char Speed, bool Dir)
 
 }
 
+void SetServoPosition(int Position, char speed) {
+    int CurrentPos = analogRead(ServoPos);
+
+    if(CurrentPos > Position) {
+        SetMotor(speed, Links);
+        do{}while(analogRead(ServoPos) < Position);
+        ClearBit(PWM_DDR, PWM_PIN);
+        return;
+    }
+    else if(CurrentPos < Position) {
+        SetMotor(speed, Rechts);
+        do{}while(analogRead(ServoPos) > Position);
+        ClearBit(PWM_DDR, PWM_PIN);
+        return;
+    }
+    else {
+        return;
+    }
+}
 
 void setup() {
 
@@ -83,11 +104,17 @@ void setup() {
     SetBit(AIN_DDR, AIN2);
 
 
+
 }
 
 void loop() {
 
-    SetMotor(75, Rechts);
+    SetServoPosition(100, 80);
 
+    delay(200);
+
+    SetServoPosition(800, 80);
+
+    delay(200);
 
 }
