@@ -81,13 +81,13 @@ void SetServoPosition(int Position, char speed) {
 
     if(CurrentPos > Position) {
         SetMotor(speed, Links);
-        do{}while(analogRead(ServoPos) < Position);
+        do{CurrentPos = analogRead(ServoPos);}while(CurrentPos < Position);
         ClearBit(PWM_DDR, PWM_PIN);
         return;
     }
     else if(CurrentPos < Position) {
         SetMotor(speed, Rechts);
-        do{}while(analogRead(ServoPos) > Position);
+        do{CurrentPos = analogRead(ServoPos);}while(CurrentPos > Position);
         ClearBit(PWM_DDR, PWM_PIN);
         return;
     }
@@ -109,11 +109,12 @@ void setup() {
 
 void loop() {
 
-    SetServoPosition(100, 80);
+    SetMotor(80, Links);
+    //SetServoPosition(100, 80);
 
     delay(200);
-
-    SetServoPosition(800, 80);
+    //SetMotor(80, Links);
+    SetServoPosition(50, 80);
 
     delay(200);
 
