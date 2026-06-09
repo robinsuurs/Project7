@@ -7,9 +7,9 @@
 #define ToggleBit(byte, bit)    (byte ^= BV(bit))
 
 
-#define PWM_PIN     PD6         //D6
-#define PWM_PORT    PORTD
-#define PWM_DDR     DDRD
+#define PWM_PIN     PD3         //D11
+#define PWM_PORT    PORTB
+#define PWM_DDR     DDRB
 
 #define AIN2        PB1        //D9
 #define AIN1        PB0        //D8
