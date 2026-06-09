@@ -1,8 +1,8 @@
 #include "HmiSafety.h"
 
 // pin definitions
-const int deadmanPin = ;
-const int ledPins[] = {};
+const int deadmanPin = 0;
+const int ledPins[] = {1, 2, 3, 4, 5, 6, 7};
 const int numLeds = 7;
 
 // function 1: starting
