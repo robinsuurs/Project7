@@ -1,12 +1,15 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <QTRSensors.h>
+#include <HmiSafety.h>
 
 QTRSensors qtr;
 constexpr uint8_t SensorCount = 7;
 uint16_t sensorValues[SensorCount];
 constexpr uint8_t QTRPins[SensorCount] = {A0, A1, A2, A3, A4, A5, A6};
 
+// IMU
+bool lifted = false;
 
 void setup() {
 
@@ -14,6 +17,7 @@ void setup() {
   while (!Serial) {
     ;
   }
+  initHmiSafety();
   qtr.setTypeAnalog();
   qtr.setSensorPins(QTRPins, SensorCount);
 
@@ -62,4 +66,24 @@ void loop() {
   }
   Serial.println();
 
+  // check if the line is visible
+  bool lineVisible = false;
+  const uint16_t lineThreshold = ; // value when the line is not visible
+
+  for (uint8_t i = 0; i< SensorCount; i++){
+    if (sensorValues[i] > lineThreshold){
+      lineVisible = true; // atleast one sensor sees the black line
+      break;
+    }
+  }
+
+  // update the HMI module
+  update7Leds(sensorValues, lineVisible, lifted);
+
+  // safety motor control
+  if (buttonPressed() && lineVisible && !lifted){
+    // drive servo
+  } else {
+    // center servo
+  }
 }

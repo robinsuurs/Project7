@@ -15,7 +15,7 @@ void initHmiSafety(){
 }
 
 // function 2: steering LED's
-void update7Leds(int deviation, bool lineVisible, bool lifted){
+void update7Leds(const uint16_t sensorValues[], bool lineVisible, bool lifted){
     // reset all LED's
     for (int i = 0; i < numLeds; i++) {
         digitalWrite(ledPins[i], LOW);
@@ -42,12 +42,16 @@ void update7Leds(int deviation, bool lineVisible, bool lifted){
     }
 
     // direct LED indication
-    int activeLedIndex = deviation;
+    uint16_t highestValue = 0;
+    int activeLedIndex = 3; // default middle LED
 
-    // safety boundaries
-    if (activeLedIndex < 0) activeLedIndex = 0;
-    if (activeLedIndex > 6) activeLedIndex = 6;
-    
+    for (int i = 0; i < numLeds; i++){
+        if (sensorValues[i] > highestValue){
+            highestValue = sensorValues[i]; // store highest sensor reading
+            activeLedIndex = i; // led index matches the sensor index
+        }
+    }
+
     // turn on specific LED
     digitalWrite(ledPins[activeLedIndex], HIGH);
 }

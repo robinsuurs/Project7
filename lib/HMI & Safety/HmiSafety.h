@@ -6,7 +6,7 @@
 void initHmiSafety();
 
 // functie 2: steering LED's
-void update7Leds(int deviation, bool lineVisible, bool lifted);
+void update7Leds(const uint16_t sensorValues[], bool lineVisible, bool lifted);
 
 // functie 3: check if button is pressed
 bool buttonPressed();
